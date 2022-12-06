@@ -25,7 +25,7 @@ class PostDetailTests(TestCase):
             author=cls.user,
             text='Тестовый пост',
             group=cls.group,
-        )    
+        )
 
     def setUp(self):
         self.authorized_client = Client()
@@ -51,7 +51,7 @@ class PostDetailTests(TestCase):
         for reverse_name, template in templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
-                self.assertTemplateUsed(response, template) 
+                self.assertTemplateUsed(response, template)
 
     def test_index_page_show_correct_context(self):
         '''Шаблон index.html сформирован с правильным контекстом'''
@@ -113,7 +113,7 @@ class PostDetailTests(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_edit_post_show_correct_context(self):
-        '''Шаблон create_post.html /Edit сформирован с правильным 
+        '''Шаблон create_post.html /Edit сформирован с правильным
         контекстом.
         '''
         response = self.authorized_client.get(

@@ -1,8 +1,6 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.test import Client, TestCase
 
 from posts.forms import PostForm
 from posts.models import Group, Post
@@ -24,20 +22,18 @@ class PostCreateFormTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.user,
             text='Тестовый пост',
-            group = cls.group,
+            group=cls.group,
         )
         cls.form = PostForm()
 
-    
     def setUp(self):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-
     def test_create_post_authorized_client(self):
         """Валидная форма создает запись в Posts."""
-        posts_count = Post.objects.count()  
+        posts_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый текст',
             'group': self.group.pk,
@@ -47,18 +43,16 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertRedirects(response, reverse(
-                                'posts:profile', kwargs={
-                                'username': PostCreateFormTests.post.author})
-                            )
-        self.assertEqual(Post.objects.count(), posts_count+1)
+        self.assertRedirects(
+            response, reverse('posts:profile', kwargs={
+                            'username': PostCreateFormTests.post.author}))
+        self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый пост',
-                group = self.group.pk
+                group=self.group.pk
             ).exists()
-        ) 
-
+        )
 
     def test_create_post_guest_client(self):
         """Неавторизованный пользователь пытается создать пост"""
@@ -75,8 +69,7 @@ class PostCreateFormTests(TestCase):
         self.assertFalse(Post.objects.filter(
             text='Тестовый текст неавторизованного пользователя').exists())
         self.assertEqual(Post.objects.count(), posts_count)
-        self.assertEqual(response.status_code, 200) 
-
+        self.assertEqual(response.status_code, 200)
 
     def test_edit_post_authorized_client(self):
         """Авторизованный пользователь может редактировать пост"""
@@ -97,4 +90,3 @@ class PostCreateFormTests(TestCase):
             )
         )
         self.assertTrue(Post.objects.filter(text=form_data['text']).exists())
-

@@ -69,13 +69,6 @@ def post_detail(request, post_id):
 def post_create(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
-        # form = PostForm(
-        # request.POST or None,
-        # files=request.FILES or None,
-        # instance=post
-        # )
-        
-
         if form.is_valid():
             new_form = form.save(commit=False)
             new_form.author = request.user

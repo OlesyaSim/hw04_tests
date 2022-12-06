@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
+from django.urls import reverse
 
 from posts.models import Post, Group
 
@@ -42,14 +43,22 @@ class TaskURLTests(TestCase):
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names = {
-            'posts/index.html': '/',
-            'posts/group_list.html': '/group/test_slug/',
-            'posts/profile.html': '/profile/auth/',
-            'posts/post_detail.html': '/posts/1/',
-            'posts/create_post.html': '/create/',
-            'posts/create_post.html': '/posts/1/edit/',
+
+            reverse('posts:index'): 'posts/index.html',
+            reverse('posts:group_list',
+                    kwargs={'slug': self.group.slug}): 'posts/group_list.html',
+            reverse('posts:profile',
+                    kwargs={'username': self.post.author
+                            }): 'posts/profile.html',
+            reverse('posts:post_detail',
+                    kwargs={'post_id': self.post.id
+                            }): 'posts/post_detail.html',
+            reverse('posts:post_create'): 'posts/create_post.html',
+            reverse('posts:post_edit',
+                    kwargs={'post_id': self.post.id
+                            }): 'posts/create_post.html',
         }
-        for template, address in templates_url_names.items():
+        for address, template in templates_url_names.items():
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
