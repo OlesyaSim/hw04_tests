@@ -1,11 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from posts.models import Post, Group
+from http import HTTPStatus
 
-
-User = get_user_model()
+from posts.models import Post, Group, User
 
 
 class StaticURLTests(TestCase):
@@ -13,8 +11,9 @@ class StaticURLTests(TestCase):
         self.guest_client = Client()
 
     def test_homepage(self):
-        response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+        response = self.guest_client.get(reverse('posts:index'))
+       # response = self.guest_client.get('/') .   БЫЛО 
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
 class TaskURLTests(TestCase):
@@ -65,33 +64,57 @@ class TaskURLTests(TestCase):
 
     def test_200_url_exists_at_desired_location(self):
         """Страница доступна пользователю код 200."""
-        response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+        # response = self.guest_client.get('/')   БЫЛО
+        response = self.guest_client.get(reverse('posts:index'))
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        response = self.guest_client.get('/group/test_slug/')
-        self.assertEqual(response.status_code, 200)
+        # response = self.guest_client.get('/group/test_slug/')
+        response = self.guest_client.get(
+            reverse('posts:group_list', kwargs={'slug': self.group.slug})
+            )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        response = self.guest_client.get('/profile/auth/')
-        self.assertEqual(response.status_code, 200)
+        # response = self.guest_client.get('/profile/auth/')
+        response = self.guest_client.get(
+            reverse('posts:profile', kwargs={'username': self.post.author})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        response = self.guest_client.get('/posts/1/')
-        self.assertEqual(response.status_code, 200)
+        # response = self.guest_client.get('/posts/1/')
+        response = self.guest_client.get(
+            reverse('posts:post_detail', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        response = self.authorized_client.get('/create/')
-        self.assertEqual(response.status_code, 200)
+        response = self.authorized_client.get(reverse('posts:post_create'))
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        response = self.authorized_client.get('/posts/1/edit/')
-        self.assertEqual(response.status_code, 200)
+        response = self.authorized_client.get(
+            reverse('posts:post_edit', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_nonexistent_url_exists_at_desired_location(self):
         """Тест несуществующей страницы."""
         response = self.guest_client.get('-5')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_edit_url_redirect_guest_client(self):
-        """Тест неавторизованый пользователь edit -> редирект страницы."""
-        response = self.guest_client.get('/create/')
-        self.assertEqual(response.status_code, 302)
+        """Тест неавторизованый пользователь -> редирект на login страницу."""
+        response = self.guest_client.get(reverse('posts:post_create'))
+        self.assertRedirects(
+            response,
+            f'{reverse("users:login")}?next={reverse("posts:post_create")}'
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
-        response = self.guest_client.get('/posts/1/edit/')
-        self.assertEqual(response.status_code, 302)
+        response = self.guest_client.get(
+            reverse('posts:post_edit', kwargs={'post_id': self.post.id})
+        )
+        self.assertRedirects(
+            response, (
+                f'{reverse("users:login")}?next='
+                f'{reverse("posts:post_edit",kwargs={"post_id":self.post.id})}'
+                )
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
