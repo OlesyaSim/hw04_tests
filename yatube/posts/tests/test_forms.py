@@ -101,7 +101,7 @@ class PostCreateFormTests(TestCase):
         self.assertTrue(Post.objects.filter(text=form_data['text']).exists())
         self.assertTrue(
             Post.objects.filter(group__id=form_data['group']).exists()
-            )
+        )
         self.assertFalse(Post.objects.filter(group__id=self.group.id).exists())
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
@@ -130,6 +130,6 @@ class PostCreateFormTests(TestCase):
         self.assertFalse(Post.objects.filter(text=form_data['text']).exists())
         self.assertFalse(
             Post.objects.filter(group__id=form_data['group']).exists()
-            )
+        )
         self.assertTrue(Post.objects.filter(group__id=self.group.id).exists())
         self.assertEqual(response.status_code, HTTPStatus.OK)

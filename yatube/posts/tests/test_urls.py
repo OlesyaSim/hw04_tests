@@ -12,7 +12,6 @@ class StaticURLTests(TestCase):
 
     def test_homepage(self):
         response = self.guest_client.get(reverse('posts:index'))
-       # response = self.guest_client.get('/') .   БЫЛО 
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
@@ -64,23 +63,19 @@ class TaskURLTests(TestCase):
 
     def test_200_url_exists_at_desired_location(self):
         """Страница доступна пользователю код 200."""
-        # response = self.guest_client.get('/')   БЫЛО
         response = self.guest_client.get(reverse('posts:index'))
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        # response = self.guest_client.get('/group/test_slug/')
         response = self.guest_client.get(
             reverse('posts:group_list', kwargs={'slug': self.group.slug})
-            )
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        # response = self.guest_client.get('/profile/auth/')
         response = self.guest_client.get(
             reverse('posts:profile', kwargs={'username': self.post.author})
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        # response = self.guest_client.get('/posts/1/')
         response = self.guest_client.get(
             reverse('posts:post_detail', kwargs={'post_id': self.post.id})
         )
@@ -115,6 +110,6 @@ class TaskURLTests(TestCase):
             response, (
                 f'{reverse("users:login")}?next='
                 f'{reverse("posts:post_edit",kwargs={"post_id":self.post.id})}'
-                )
+            )
         )
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
